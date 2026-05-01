@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Diagrama de Clases — Dash</title>
+<style>
+  body { margin: 0; padding: 20px; background: #eef1f4; font-family: 'Helvetica Neue', Arial, sans-serif; }
+  .toolbar { max-width: 1720px; margin: 0 auto 12px; display: flex; gap: 10px; align-items: center; }
+  .toolbar h1 { font-size: 18px; margin: 0; color: #2c3e50; }
+  .toolbar button { background: #2c3e50; color: #fff; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  .toolbar button:hover { background: #1a252f; }
+  .container { max-width: 1720px; margin: 0 auto; background: #fff; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 8px; }
+  svg { width: 100%; height: auto; display: block; }
+  .hint { max-width: 1720px; margin: 12px auto 0; font-size: 12px; color: #777; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .toolbar, .hint { display: none; }
+    .container { box-shadow: none; padding: 0; }
+    @page { size: landscape; margin: 10mm; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <h1>Diagrama de Clases — Dash</h1>
+  <button onclick="window.print()">Imprimir / Guardar como PDF</button>
+</div>
+
+<div class="container">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1720 1620" font-family="'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <!-- Hollow triangle for inheritance -->
+    <marker id="inherit" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" orient="auto">
+      <polygon points="0 0, 13 7, 0 14" fill="#fff" stroke="#34495e" stroke-width="1.5"/>
+    </marker>
+    <!-- Filled diamond for composition -->
+    <marker id="compose" viewBox="0 0 18 12" refX="1" refY="6" markerWidth="18" markerHeight="12" orient="auto">
+      <polygon points="0 6, 9 0, 18 6, 9 12" fill="#34495e" stroke="#34495e"/>
+    </marker>
+    <!-- Arrow for association -->
+    <marker id="assoc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto">
+      <polygon points="0 0, 10 5, 0 10" fill="#34495e"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1720" height="1620" fill="#f8f9fa"/>
+
+  <!-- Title -->
+  <text x="860" y="38" text-anchor="middle" font-size="26" font-weight="bold" fill="#2c3e50">Diagrama de Clases — Dash</text>
+  <text x="860" y="62" text-anchor="middle" font-size="13" fill="#7b8a9b">Juego de cartas online · Lógica del dominio</text>
+
+  <!-- ============== LEYENDA ============== -->
+  <g transform="translate(40,90)">
+    <rect width="280" height="160" fill="#fff" stroke="#bdc3c7" stroke-width="1" rx="3"/>
+    <text x="140" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">Leyenda</text>
+    <line x1="20" y1="48" x2="80" y2="48" stroke="#34495e" stroke-width="1.5" marker-end="url(#inherit)"/>
+    <text x="100" y="52" font-size="11" fill="#2c3e50">Herencia (extends)</text>
+    <line x1="20" y1="78" x2="80" y2="78" stroke="#34495e" stroke-width="1.5" marker-start="url(#compose)"/>
+    <text x="100" y="82" font-size="11" fill="#2c3e50">Composición (◆── tiene un)</text>
+    <line x1="20" y1="108" x2="80" y2="108" stroke="#34495e" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#assoc)"/>
+    <text x="100" y="112" font-size="11" fill="#2c3e50">Asociación (referencia)</text>
+    <rect x="20" y="128" width="14" height="14" fill="#5d6d7e"/>
+    <text x="42" y="140" font-size="11" fill="#2c3e50" font-style="italic">«abstract» — clase abstracta</text>
+  </g>
+
+  <!-- ============== ENUMS ============== -->
+  <!-- Palo enum -->
+  <g transform="translate(700,90)">
+    <rect width="180" height="130" fill="#fff" stroke="#117a65" stroke-width="2" rx="3"/>
+    <rect width="180" height="40" fill="#117a65"/>
+    <text x="90" y="18" text-anchor="middle" fill="#fff" font-size="10" font-style="italic">«enumeration»</text>
+    <text x="90" y="34" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">Palo</text>
+    <text x="14" y="60" font-size="12" fill="#2c3e50">ORO</text>
+    <text x="14" y="78" font-size="12" fill="#2c3e50">COPA</text>
+    <text x="14" y="96" font-size="12" fill="#2c3e50">BASTO</text>
+    <text x="14" y="114" font-size="12" fill="#2c3e50">ESPADA</text>
+  </g>
+
+  <!-- EstadoRonda enum -->
+  <g transform="translate(910,90)">
+    <rect width="240" height="160" fill="#fff" stroke="#117a65" stroke-width="2" rx="3"/>
+    <rect width="240" height="40" fill="#117a65"/>
+    <text x="120" y="18" text-anchor="middle" fill="#fff" font-size="10" font-style="italic">«enumeration»</text>
+    <text x="120" y="34" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">EstadoRonda</text>
+    <text x="14" y="60" font-size="12" fill="#2c3e50">REPARTO</text>
+    <text x="14" y="78" font-size="12" fill="#2c3e50">MIRAR_INICIAL</text>
+    <text x="14" y="96" font-size="12" fill="#2c3e50">EN_CURSO</text>
+    <text x="14" y="114" font-size="12" fill="#2c3e50">DASH_DECLARADO</text>
+    <text x="14" y="132" font-size="12" fill="#2c3e50">REVELACION</text>
+    <text x="14" y="150" font-size="12" fill="#2c3e50">FINALIZADA</text>
+  </g>
+
+  <!-- ============== JERARQUÍA DE CARTA ============== -->
+
+  <!-- Carta (abstract) -->
+  <g transform="translate(280,300)">
+    <rect width="320" height="200" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="320" height="44" fill="#5d6d7e"/>
+    <text x="160" y="18" text-anchor="middle" fill="#fff" font-size="10" font-style="italic">«abstract»</text>
+    <text x="160" y="36" text-anchor="middle" fill="#fff" font-size="16" font-weight="bold">Carta</text>
+    <text x="14" y="62" font-size="11" fill="#2c3e50">- numero : int</text>
+    <text x="14" y="78" font-size="11" fill="#2c3e50">- palo : Palo</text>
+    <line x1="0" y1="90" x2="320" y2="90" stroke="#34495e"/>
+    <text x="14" y="106" font-size="11" fill="#2c3e50">+ getNumero() : int</text>
+    <text x="14" y="122" font-size="11" fill="#2c3e50">+ getPalo() : Palo</text>
+    <text x="14" y="138" font-size="11" fill="#2c3e50" font-style="italic">+ getValor() : int  «abstract»</text>
+    <text x="14" y="154" font-size="11" fill="#2c3e50">+ aplicarEfecto(r: Ronda, j: Jugador)</text>
+    <text x="14" y="170" font-size="11" fill="#2c3e50">+ toString() : String</text>
+  </g>
+
+  <!-- CartaNormal -->
+  <g transform="translate(60,560)">
+    <rect width="240" height="100" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="240" height="32" fill="#2c3e50"/>
+    <text x="120" y="22" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">CartaNormal</text>
+    <text x="14" y="52" font-size="11" fill="#2c3e50">+ CartaNormal(num, palo)</text>
+    <line x1="0" y1="62" x2="240" y2="62" stroke="#34495e"/>
+    <text x="14" y="78" font-size="11" fill="#2c3e50">+ getValor() : int</text>
+    <text x="14" y="92" font-size="10" fill="#7b8a9b">  → return numero</text>
+  </g>
+
+  <!-- CartaEspecial (abstract) -->
+  <g transform="translate(380,560)">
+    <rect width="300" height="100" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="300" height="44" fill="#5d6d7e"/>
+    <text x="150" y="18" text-anchor="middle" fill="#fff" font-size="10" font-style="italic">«abstract»</text>
+    <text x="150" y="36" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">CartaEspecial</text>
+    <text x="14" y="64" font-size="11" fill="#7b8a9b" font-style="italic">// marcador para cartas con</text>
+    <text x="14" y="80" font-size="11" fill="#7b8a9b" font-style="italic">// tratamiento especial</text>
+  </g>
+
+  <!-- CartaCaballo -->
+  <g transform="translate(40,720)">
+    <rect width="240" height="160" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="240" height="32" fill="#2c3e50"/>
+    <text x="120" y="22" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">CartaCaballo</text>
+    <text x="14" y="52" font-size="11" fill="#2c3e50">+ CartaCaballo(palo)</text>
+    <line x1="0" y1="62" x2="240" y2="62" stroke="#34495e"/>
+    <text x="14" y="78" font-size="11" fill="#2c3e50">+ getValor() : int → 11</text>
+    <text x="14" y="94" font-size="11" fill="#2c3e50">+ aplicarEfecto(r, j)</text>
+    <text x="14" y="110" font-size="10" fill="#7b8a9b">  intercambia carta</text>
+    <text x="14" y="124" font-size="10" fill="#7b8a9b">  con otro jugador</text>
+  </g>
+
+  <!-- CartaDiez -->
+  <g transform="translate(310,720)">
+    <rect width="240" height="160" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="240" height="32" fill="#2c3e50"/>
+    <text x="120" y="22" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">CartaDiez</text>
+    <text x="14" y="52" font-size="11" fill="#2c3e50">+ CartaDiez(palo)</text>
+    <line x1="0" y1="62" x2="240" y2="62" stroke="#34495e"/>
+    <text x="14" y="78" font-size="11" fill="#2c3e50">+ getValor() : int → 10</text>
+    <text x="14" y="94" font-size="11" fill="#2c3e50">+ aplicarEfecto(r, j)</text>
+    <text x="14" y="110" font-size="10" fill="#7b8a9b">  permite mirar una</text>
+    <text x="14" y="124" font-size="10" fill="#7b8a9b">  carta propia</text>
+  </g>
+
+  <!-- CartaDoceEspecial -->
+  <g transform="translate(580,720)">
+    <rect width="270" height="160" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="270" height="32" fill="#2c3e50"/>
+    <text x="135" y="22" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">CartaDoceEspecial</text>
+    <text x="14" y="52" font-size="11" fill="#2c3e50">+ CartaDoceEspecial(palo)</text>
+    <line x1="0" y1="62" x2="270" y2="62" stroke="#34495e"/>
+    <text x="14" y="78" font-size="11" fill="#2c3e50">+ getValor() : int → 0</text>
+    <text x="14" y="94" font-size="10" fill="#7b8a9b">  solo BASTO o ESPADA</text>
+    <text x="14" y="112" font-size="10" fill="#7b8a9b">  validar en constructor</text>
+    <text x="14" y="130" font-size="10" fill="#7b8a9b">  no tiene efecto al</text>
+    <text x="14" y="144" font-size="10" fill="#7b8a9b">  descartarse</text>
+  </g>
+
+  <!-- INHERITANCE LINES (cards) -->
+  <!-- Carta -> CartaNormal -->
+  <path d="M 380,500 L 380,540 L 180,540 L 180,560" fill="none" stroke="#34495e" stroke-width="1.5" marker-end="url(#inherit)"/>
+  <!-- Carta -> CartaEspecial -->
+  <path d="M 500,500 L 500,540 L 530,540 L 530,560" fill="none" stroke="#34495e" stroke-width="1.5" marker-end="url(#inherit)"/>
+  <!-- CartaEspecial -> CartaCaballo -->
+  <path d="M 480,660 L 480,694 L 160,694 L 160,720" fill="none" stroke="#34495e" stroke-width="1.5" marker-end="url(#inherit)"/>
+  <!-- CartaEspecial -> CartaDiez -->
+  <path d="M 530,660 L 530,694 L 430,694 L 430,720" fill="none" stroke="#34495e" stroke-width="1.5" marker-end="url(#inherit)"/>
+  <!-- CartaEspecial -> CartaDoceEspecial -->
+  <path d="M 580,660 L 580,694 L 715,694 L 715,720" fill="none" stroke="#34495e" stroke-width="1.5" marker-end="url(#inherit)"/>
+
+  <!-- ============== GAME FLOW ============== -->
+
+  <!-- GameManager -->
+  <g transform="translate(1180,300)">
+    <rect width="500" height="280" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="500" height="32" fill="#1a5490"/>
+    <text x="250" y="22" text-anchor="middle" fill="#fff" font-size="16" font-weight="bold">GameManager</text>
+    <text x="14" y="52" font-size="11" fill="#2c3e50">- partidaActual : Partida</text>
+    <line x1="0" y1="62" x2="500" y2="62" stroke="#34495e"/>
+    <text x="14" y="78" font-size="11" fill="#2c3e50">+ crearPartida(nombres: List&lt;String&gt;, limite: int)</text>
+    <text x="14" y="94" font-size="11" fill="#2c3e50">+ getPartida() : Partida</text>
+    <text x="14" y="112" font-size="11" fill="#7b8a9b" font-style="italic">// acciones del jugador (futuro: por socket)</text>
+    <text x="14" y="130" font-size="11" fill="#2c3e50">+ accionTomarMazo(j: Jugador) : Carta</text>
+    <text x="14" y="146" font-size="11" fill="#2c3e50">+ accionTomarDescarte(j: Jugador) : Carta</text>
+    <text x="14" y="162" font-size="11" fill="#2c3e50">+ accionDescartar(j: Jugador, pos: int)</text>
+    <text x="14" y="178" font-size="11" fill="#2c3e50">+ accionIntercambiar(j, pos: int, nueva: Carta)</text>
+    <text x="14" y="194" font-size="11" fill="#2c3e50">+ accionDeclararDash(j: Jugador)</text>
+    <text x="14" y="210" font-size="11" fill="#2c3e50">+ accionMirarCartasIniciales(j, pos: List&lt;int&gt;)</text>
+    <text x="14" y="226" font-size="11" fill="#2c3e50">+ finalizarTurnoActual()</text>
+    <text x="14" y="252" font-size="10" fill="#7b8a9b" font-style="italic">Fachada: punto único de entrada para el juego</text>
+  </g>
+
+  <!-- Partida -->
+  <g transform="translate(1180,640)">
+    <rect width="340" height="220" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="340" height="32" fill="#1a5490"/>
+    <text x="170" y="22" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">Partida</text>
+    <text x="14" y="52" font-size="11" fill="#2c3e50">- jugadores : List&lt;Jugador&gt;</text>
+    <text x="14" y="68" font-size="11" fill="#2c3e50">- rondaActual : Ronda</text>
+    <text x="14" y="84" font-size="11" fill="#2c3e50">- puntajeLimite : int</text>
+    <text x="14" y="100" font-size="11" fill="#2c3e50">- rondasJugadas : int</text>
+    <line x1="0" y1="110" x2="340" y2="110" stroke="#34495e"/>
+    <text x="14" y="126" font-size="11" fill="#2c3e50">+ Partida(jugadores, limite: int)</text>
+    <text x="14" y="142" font-size="11" fill="#2c3e50">+ iniciarNuevaRonda()</text>
+    <text x="14" y="158" font-size="11" fill="#2c3e50">+ finalizarRondaActual()</text>
+    <text x="14" y="174" font-size="11" fill="#2c3e50">+ haTerminado() : boolean</text>
+    <text x="14" y="190" font-size="11" fill="#2c3e50">+ obtenerGanador() : Jugador</text>
+    <text x="14" y="206" font-size="10" fill="#7b8a9b" font-style="italic">  termina si ≥3 perdieron</text>
+  </g>
+
+  <!-- Ronda -->
+  <g transform="translate(1280,920)">
+    <rect width="380" height="320" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="380" height="32" fill="#1a5490"/>
+    <text x="190" y="22" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">Ronda</text>
+    <text x="14" y="52" font-size="11" fill="#2c3e50">- jugadores : List&lt;Jugador&gt;</text>
+    <text x="14" y="68" font-size="11" fill="#2c3e50">- mazo : Mazo</text>
+    <text x="14" y="84" font-size="11" fill="#2c3e50">- descarte : Descarte</text>
+    <text x="14" y="100" font-size="11" fill="#2c3e50">- estado : EstadoRonda</text>
+    <text x="14" y="116" font-size="11" fill="#2c3e50">- indiceJugadorActual : int</text>
+    <text x="14" y="132" font-size="11" fill="#2c3e50">- jugadorQueDeclaroDash : Jugador</text>
+    <line x1="0" y1="142" x2="380" y2="142" stroke="#34495e"/>
+    <text x="14" y="158" font-size="11" fill="#2c3e50">+ Ronda(jugadores)</text>
+    <text x="14" y="174" font-size="11" fill="#2c3e50">+ iniciar()</text>
+    <text x="14" y="190" font-size="11" fill="#2c3e50">+ getJugadorActual() : Jugador</text>
+    <text x="14" y="206" font-size="11" fill="#2c3e50">+ siguienteTurno()</text>
+    <text x="14" y="222" font-size="11" fill="#2c3e50">+ tomarDelMazo() : Carta</text>
+    <text x="14" y="238" font-size="11" fill="#2c3e50">+ tomarDelDescarte() : Carta</text>
+    <text x="14" y="254" font-size="11" fill="#2c3e50">+ descartarCarta(j, pos: int)</text>
+    <text x="14" y="270" font-size="11" fill="#2c3e50">+ intercambiarCarta(j, pos, nueva)</text>
+    <text x="14" y="286" font-size="11" fill="#2c3e50">+ declararDash(j: Jugador)</text>
+    <text x="14" y="302" font-size="11" fill="#2c3e50">+ revelarYCalcular() : Map</text>
+  </g>
+
+  <!-- Jugador -->
+  <g transform="translate(820,920)">
+    <rect width="320" height="250" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="320" height="32" fill="#2c3e50"/>
+    <text x="160" y="22" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">Jugador</text>
+    <text x="14" y="52" font-size="11" fill="#2c3e50">- nombre : String</text>
+    <text x="14" y="68" font-size="11" fill="#2c3e50">- mano : Mano</text>
+    <text x="14" y="84" font-size="11" fill="#2c3e50">- puntajeAcumulado : int</text>
+    <text x="14" y="100" font-size="11" fill="#2c3e50">- haPerdido : boolean</text>
+    <line x1="0" y1="110" x2="320" y2="110" stroke="#34495e"/>
+    <text x="14" y="126" font-size="11" fill="#2c3e50">+ Jugador(nombre: String)</text>
+    <text x="14" y="142" font-size="11" fill="#2c3e50">+ getNombre() : String</text>
+    <text x="14" y="158" font-size="11" fill="#2c3e50">+ getMano() : Mano</text>
+    <text x="14" y="174" font-size="11" fill="#2c3e50">+ getPuntajeAcumulado() : int</text>
+    <text x="14" y="190" font-size="11" fill="#2c3e50">+ recibirCarta(c: Carta)</text>
+    <text x="14" y="206" font-size="11" fill="#2c3e50">+ descartarCarta(pos: int) : Carta</text>
+    <text x="14" y="222" font-size="11" fill="#2c3e50">+ sumarPuntaje(p: int)</text>
+    <text x="14" y="238" font-size="11" fill="#2c3e50">+ verificarDerrota(limite: int)</text>
+  </g>
+
+  <!-- Mano -->
+  <g transform="translate(420,1000)">
+    <rect width="320" height="220" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="320" height="32" fill="#2c3e50"/>
+    <text x="160" y="22" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">Mano</text>
+    <text x="14" y="52" font-size="11" fill="#2c3e50">- cartas : List&lt;Carta&gt;</text>
+    <text x="14" y="68" font-size="10" fill="#7b8a9b">  // hasta 4 (más por penalización)</text>
+    <line x1="0" y1="80" x2="320" y2="80" stroke="#34495e"/>
+    <text x="14" y="96" font-size="11" fill="#2c3e50">+ Mano()</text>
+    <text x="14" y="112" font-size="11" fill="#2c3e50">+ agregar(c: Carta)</text>
+    <text x="14" y="128" font-size="11" fill="#2c3e50">+ reemplazar(pos, nueva) : Carta</text>
+    <text x="14" y="144" font-size="11" fill="#2c3e50">+ obtener(pos: int) : Carta</text>
+    <text x="14" y="160" font-size="11" fill="#2c3e50">+ remover(pos: int) : Carta</text>
+    <text x="14" y="176" font-size="11" fill="#2c3e50">+ tamano() : int</text>
+    <text x="14" y="192" font-size="11" fill="#2c3e50">+ estaVacia() : boolean</text>
+    <text x="14" y="208" font-size="11" fill="#2c3e50">+ calcularPuntaje() : int</text>
+  </g>
+
+  <!-- Mazo -->
+  <g transform="translate(40,1290)">
+    <rect width="280" height="180" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="280" height="32" fill="#2c3e50"/>
+    <text x="140" y="22" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">Mazo</text>
+    <text x="14" y="52" font-size="11" fill="#2c3e50">- cartas : Stack&lt;Carta&gt;</text>
+    <line x1="0" y1="62" x2="280" y2="62" stroke="#34495e"/>
+    <text x="14" y="78" font-size="11" fill="#2c3e50">+ Mazo()</text>
+    <text x="14" y="94" font-size="11" fill="#2c3e50">+ mezclar()</text>
+    <text x="14" y="110" font-size="11" fill="#2c3e50">+ robar() : Carta</text>
+    <text x="14" y="126" font-size="11" fill="#2c3e50">+ estaVacio() : boolean</text>
+    <text x="14" y="142" font-size="11" fill="#2c3e50">+ tamano() : int</text>
+    <text x="14" y="158" font-size="11" fill="#2c3e50" font-weight="bold">+ {static} crearMazoEspañol() : Mazo</text>
+    <text x="14" y="172" font-size="10" fill="#7b8a9b" font-style="italic">  fábrica: 40 cartas correctas</text>
+  </g>
+
+  <!-- Descarte -->
+  <g transform="translate(360,1290)">
+    <rect width="260" height="180" fill="#fff" stroke="#34495e" stroke-width="2" rx="3"/>
+    <rect width="260" height="32" fill="#2c3e50"/>
+    <text x="130" y="22" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">Descarte</text>
+    <text x="14" y="52" font-size="11" fill="#2c3e50">- cartas : Stack&lt;Carta&gt;</text>
+    <line x1="0" y1="62" x2="260" y2="62" stroke="#34495e"/>
+    <text x="14" y="78" font-size="11" fill="#2c3e50">+ Descarte()</text>
+    <text x="14" y="94" font-size="11" fill="#2c3e50">+ agregar(c: Carta)</text>
+    <text x="14" y="110" font-size="11" fill="#2c3e50">+ verUltima() : Carta</text>
+    <text x="14" y="126" font-size="11" fill="#2c3e50">+ tomarUltima() : Carta</text>
+    <text x="14" y="142" font-size="11" fill="#2c3e50">+ estaVacio() : boolean</text>
+    <text x="14" y="158" font-size="11" fill="#2c3e50">+ tamano() : int</text>
+  </g>
+
+  <!-- ============== RELATIONSHIPS GAME FLOW ============== -->
+  <!-- GameManager ◆── Partida -->
+  <line x1="1380" y1="580" x2="1380" y2="640" stroke="#34495e" stroke-width="1.5" marker-start="url(#compose)"/>
+  <text x="1390" y="615" font-size="10" fill="#7b8a9b">1</text>
+
+  <!-- Partida ◆── Ronda (rondaActual) -->
+  <path d="M 1500,860 L 1500,890 L 1470,890 L 1470,920" fill="none" stroke="#34495e" stroke-width="1.5" marker-start="url(#compose)"/>
+  <text x="1505" y="900" font-size="10" fill="#7b8a9b">1 (actual)</text>
+
+  <!-- Partida ◆── Jugador (2..4) -->
+  <path d="M 1180,780 L 1140,780" fill="none" stroke="#34495e" stroke-width="1.5" marker-start="url(#compose)"/>
+  <path d="M 1140,780 L 1140,920" fill="none" stroke="#34495e" stroke-width="1.5"/>
+  <text x="1145" y="800" font-size="10" fill="#7b8a9b">2..4</text>
+
+  <!-- Ronda ──> Jugador (referencia) -->
+  <path d="M 1280,1020 L 1140,1020" fill="none" stroke="#34495e" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#assoc)"/>
+  <text x="1180" y="1015" font-size="10" fill="#7b8a9b">ref</text>
+
+  <!-- Ronda ◆── Mazo / Descarte (mostramos sólo etiqueta porque cruzaría) -->
+  <path d="M 1280,1130 L 1180,1130 L 1180,1380 L 620,1380" fill="none" stroke="#34495e" stroke-width="1.5" marker-start="url(#compose)"/>
+  <text x="900" y="1375" font-size="10" fill="#7b8a9b">1 (mazo / descarte)</text>
+
+  <!-- Jugador ◆── Mano -->
+  <path d="M 820,1080 L 740,1080" fill="none" stroke="#34495e" stroke-width="1.5" marker-start="url(#compose)"/>
+  <text x="755" y="1075" font-size="10" fill="#7b8a9b">1</text>
+
+  <!-- Mano ◆── Carta (asociación con el lado izquierdo) -->
+  <path d="M 420,1080 L 380,1080 L 380,820 L 280,820 L 280,500" fill="none" stroke="#34495e" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#assoc)"/>
+  <text x="330" y="945" font-size="10" fill="#7b8a9b">contiene Carta(s)</text>
+
+  <!-- Mazo / Descarte → Carta (etiqueta de relación, sin línea) -->
+  <text x="60" y="1500" font-size="10" fill="#7b8a9b" font-style="italic">Mazo y Descarte contienen Cartas</text>
+  <text x="60" y="1514" font-size="10" fill="#7b8a9b" font-style="italic">(asociación con la jerarquía Carta de la izquierda)</text>
+
+</svg>
+</div>
+
+<div class="hint">
+  Para guardar como PDF: hacé clic en "Imprimir / Guardar como PDF" o presioná Ctrl+P (Cmd+P en Mac) y elegí "Guardar como PDF".
+</div>
+
+</body>
+</html>
