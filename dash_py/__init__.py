@@ -16,7 +16,8 @@ from .mano import Mano
 from .mazo import Mazo
 from .descarte import Descarte
 from .jugador import Jugador
-from .decisor import Decisor, DecisorSimulador
+from .decisor import Decisor, DecisorSimulador, DecisorMixto
+from .decisor_consola import DecisorConsola
 from .ronda import Ronda
 
 __all__ = [
@@ -33,5 +34,7 @@ __all__ = [
     "Jugador",
     "Decisor",
     "DecisorSimulador",
+    "DecisorMixto",
+    "DecisorConsola",
     "Ronda",
 ]

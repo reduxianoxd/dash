@@ -17,7 +17,7 @@ Implementaciones concretas:
 
 from __future__ import annotations
 
-from typing import List, Optional, Protocol, Tuple, runtime_checkable
+from typing import List, Mapping, Optional, Protocol, Tuple, runtime_checkable
 
 from .carta import Carta
 from .descarte import Descarte
@@ -28,6 +28,16 @@ from .mazo import Mazo
 # Acción que se devuelve en fase 2: ("tirar", None) o ("cambiar", posicion)
 AccionSwap = Tuple[str, Optional[int]]
 
+# Acción al inicio de la fase 2:
+#   ("tomar_descarte", posicion) -> tomar el tope del descarte y cambiarlo
+#                                    por la carta en `posicion` de la mano
+#                                    (la vieja vuelve al tope del descarte,
+#                                    sin disparar efecto).
+#   ("levantar", None)            -> seguir con el flujo de siempre: robar
+#                                    una carta del mazo y decidir con
+#                                    decidir_swap.
+AccionInicioFase2 = Tuple[str, Optional[int]]
+
 # Decisión del Caballo: con quién y qué posiciones intercambiar.
 # (otro_jugador, posicion_del_otro, posicion_propia) o None para no usar el efecto.
 DecisionCaballo = Optional[Tuple[Jugador, int, int]]
@@ -35,6 +45,25 @@ DecisionCaballo = Optional[Tuple[Jugador, int, int]]
 
 @runtime_checkable
 class Decisor(Protocol):
+
+    def decidir_proxima_tirada(
+        self,
+        jugador: Jugador,
+        descarte: Descarte,
+    ) -> Optional[int]:
+        """
+        Devuelve la próxima posición de la mano que el jugador quiere
+        INTENTAR tirar al descarte (la tirada puede fallar y ganarse una
+        penalización). None significa "ya no quiero tirar más".
+        """
+        ...
+
+    def decidir_inicio_fase2(
+        self,
+        jugador: Jugador,
+        mazo: Mazo,
+        descarte: Descarte,
+    ) -> AccionInicioFase2: ...
 
     def decidir_swap(
         self,
@@ -75,6 +104,55 @@ class DecisorSimulador:
 
     def __init__(self, umbral_dash: int = UMBRAL_DASH_DEFAULT) -> None:
         self.umbral_dash = umbral_dash
+
+    # ---- Fase 1 / Fase 1' (intento de tirada) ------------------------
+    def decidir_proxima_tirada(
+        self,
+        jugador: Jugador,
+        descarte: Descarte,
+    ) -> Optional[int]:
+        """
+        Estrategia segura: solo intentar tirar matches que el jugador
+        EFECTIVAMENTE conozca (cartas_vistas), para no llevarse penalización.
+        """
+        tope = descarte.ver_tope()
+        if tope is None:
+            return None
+        mano = jugador.get_mano()
+        for i in range(mano.tamano()):
+            if not jugador.conoce_carta(i):
+                continue
+            if mano.obtener(i).get_numero() == tope.get_numero():
+                return i
+        return None
+
+    # ---- Inicio de fase 2: tomar del descarte o levantar -------------
+    def decidir_inicio_fase2(
+        self,
+        jugador: Jugador,
+        mazo: Mazo,
+        descarte: Descarte,
+    ) -> AccionInicioFase2:
+        """
+        Si el tope del descarte vale menos que la peor carta de la mano,
+        lo tomo y la cambio por esa peor; si no, levanto del mazo.
+        """
+        tope = descarte.ver_tope()
+        if tope is None:
+            return ("levantar", None)
+        mano = jugador.get_mano()
+        if mano.tamano() == 0:
+            return ("levantar", None)
+        peor_pos = -1
+        peor_valor = -1
+        for i in range(mano.tamano()):
+            v = mano.obtener(i).get_valor()
+            if v > peor_valor:
+                peor_valor = v
+                peor_pos = i
+        if peor_pos != -1 and tope.get_valor() < peor_valor:
+            return ("tomar_descarte", peor_pos)
+        return ("levantar", None)
 
     # ---- Fase 2 -----------------------------------------------------
     def decidir_swap(
@@ -121,3 +199,64 @@ class DecisorSimulador:
         if objetivo.get_mano().tamano() == 0 or jugador.get_mano().tamano() == 0:
             return None
         return (objetivo, 0, 0)
+
+
+# --------------------------------------------------------------------
+# DecisorMixto: un Decisor que despacha al concreto según el jugador
+# --------------------------------------------------------------------
+
+class DecisorMixto:
+    """
+    Despacha cada decisión al `Decisor` concreto del jugador correspondiente.
+    Sirve para mezclar humano + simuladores en una misma ronda sin tener
+    que cambiar la API de Ronda: la Ronda sigue recibiendo un único
+    Decisor, que internamente rutea.
+    """
+
+    def __init__(self, mapa: Mapping[Jugador, Decisor]) -> None:
+        self._mapa = dict(mapa)
+
+    def _para(self, jugador: Jugador) -> Decisor:
+        d = self._mapa.get(jugador)
+        if d is None:
+            raise KeyError(
+                f"No hay decisor configurado para {jugador.get_nombre()}"
+            )
+        return d
+
+    def decidir_proxima_tirada(
+        self,
+        jugador: Jugador,
+        descarte: Descarte,
+    ) -> Optional[int]:
+        return self._para(jugador).decidir_proxima_tirada(jugador, descarte)
+
+    def decidir_inicio_fase2(
+        self,
+        jugador: Jugador,
+        mazo: Mazo,
+        descarte: Descarte,
+    ) -> AccionInicioFase2:
+        return self._para(jugador).decidir_inicio_fase2(jugador, mazo, descarte)
+
+    def decidir_swap(
+        self,
+        jugador: Jugador,
+        levantada: Carta,
+        mazo: Mazo,
+        descarte: Descarte,
+    ) -> AccionSwap:
+        return self._para(jugador).decidir_swap(jugador, levantada, mazo, descarte)
+
+    def querer_cantar(self, jugador: Jugador) -> bool:
+        return self._para(jugador).querer_cantar(jugador)
+
+    def elegir_pos_para_diez(self, jugador: Jugador) -> Optional[int]:
+        return self._para(jugador).elegir_pos_para_diez(jugador)
+
+    def elegir_caballo(
+        self,
+        jugador: Jugador,
+        otros: List[Jugador],
+    ) -> DecisionCaballo:
+        return self._para(jugador).elegir_caballo(jugador, otros)

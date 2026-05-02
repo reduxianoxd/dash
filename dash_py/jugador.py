@@ -131,7 +131,15 @@ class Jugador:
 
     def posiciones_que_coinciden(self, descarte: "Descarte") -> List[int]:
         """
-        Devuelve las posiciones de la mano cuyo numero coincide con el tope del descarte.
+        Devuelve las posiciones de la mano cuyo numero coincide con el tope
+        del descarte (TODAS, hayan sido vistas o no por el jugador).
+
+        Esta es una utilidad para encontrar matches reales. La REGLA del
+        juego permite tirar cualquier carta (incluso a ciegas); si la
+        tirada no matchea hay penalización (1 carta del mazo). Por eso
+        este método no filtra por `conoce_carta`: el filtrado lo hace
+        la estrategia del Decisor (ej. el simulador solo intenta vistas).
+
         Si el descarte está vacío, no hay match posible: devuelve [].
         """
         tope = descarte.ver_tope()

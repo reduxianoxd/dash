@@ -26,6 +26,37 @@ from .ronda import Ronda
 # Helpers de impresión
 # --------------------------------------------------------------------
 
+def _imprimir_fase_tirar(fase: dict, etiqueta: str) -> None:
+    """Imprime exitosas, fallidas y penalizaciones de una sub-fase de tirar matches."""
+    tiradas = fase.get("tiradas") or []
+    fallidas = fase.get("fallidas") or []
+    penalizaciones = fase.get("penalizaciones") or []
+
+    if not tiradas and not fallidas:
+        if etiqueta == "Fase 1":
+            print(f"  {etiqueta} -> no intenta tirar nada")
+        return
+
+    if tiradas:
+        print(
+            f"  {etiqueta} -> tira {len(tiradas)} carta(s) que matchean: "
+            + ", ".join(str(c) for c in tiradas)
+        )
+        for ef in fase.get("efectos", []):
+            print(f"           {ef}")
+    if fallidas:
+        intentos = ", ".join(f"pos {p}={c}" for p, c in fallidas)
+        print(
+            f"  {etiqueta} -> {len(fallidas)} intento(s) FALLIDO(s) "
+            f"(par mal cantado): {intentos}"
+        )
+        if penalizaciones:
+            print(
+                "           penalizacion: levanta del mazo "
+                + ", ".join(str(c) for c in penalizaciones)
+            )
+
+
 def imprimir_log_turno(log: dict) -> None:
     j: Jugador = log["jugador"]
     print(f"\nTurno de {j.get_nombre()}:")
@@ -36,16 +67,13 @@ def imprimir_log_turno(log: dict) -> None:
         + "]"
     )
 
-    tiradas = log["fase1_tiradas"]
-    if tiradas:
+    if log.get("reshuffle"):
         print(
-            f"  Fase 1 -> tira {len(tiradas)} carta(s) que coinciden: "
-            + ", ".join(str(c) for c in tiradas)
+            f"  [reshuffle] mazo vacio: se reciclaron {log['reshuffle']} "
+            "cartas del descarte"
         )
-        for ef in log["fase1_efectos"]:
-            print(f"           {ef}")
-    else:
-        print("  Fase 1 -> sin coincidencias, no tira nada de la mano")
+
+    _imprimir_fase_tirar(log["fase1"], etiqueta="Fase 1")
 
     f2 = log["fase2"]
     if f2 is None:
@@ -65,6 +93,17 @@ def imprimir_log_turno(log: dict) -> None:
         )
         if log["fase2_efecto"]:
             print(f"           {log['fase2_efecto']}")
+    elif f2["accion"] == "tomar_descarte":
+        print(
+            f"  Fase 2 -> toma el tope del descarte ({f2['tomada']}), "
+            f"lo cambia por pos {f2['posicion']}. Al descarte: {f2['al_descarte']}"
+        )
+        if log["fase2_efecto"]:
+            print(f"           {log['fase2_efecto']}")
+
+    fase1_post = log.get("fase1_post") or {}
+    if fase1_post.get("tiradas") or fase1_post.get("fallidas"):
+        _imprimir_fase_tirar(fase1_post, etiqueta="Fase 1' (post fase 2)")
 
     if log["canto_dash"]:
         print(f"  Fase 3 -> {j.get_nombre()} canta DASH!")
