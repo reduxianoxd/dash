@@ -1,138 +1,149 @@
-[README.md](https://github.com/user-attachments/files/27280376/README.md)
 # Dash
 
 Implementación en Python de un juego de cartas con baraja española en el que cada jugador trata de terminar la ronda con el menor puntaje en mano. Originalmente prototipado en Java (`src/dash/`); este README cubre la versión Python que vive en `src/dash_py/`.
 
 ## El juego en una línea
 
-Mazo español de 40 cartas. Cada jugador empieza con 4 cartas boca abajo y solo conoce 2 de ellas. En cada turno tira matches al descarte y/o levanta del mazo para mejorar su mano. Cuando alguien canta **Dash**, los demás juegan un turno más y se revelan las manos: cuanto menos puntaje, mejor.
+Mazo de 48 cartas (variante de baraja española que incluye el 8 y el 9). Cada jugador empieza con 4 cartas boca abajo y solo conoce 2 de ellas. En cada turno tira matches al descarte, levanta del mazo para mejorar su mano, y puede arriesgarse a tirar cartas que no vio. Cuando alguien canta **Dash**, los demás juegan un turno más y se revelan las manos: cuanto menos puntaje, mejor. La partida dura varias rondas hasta que alguien supera los 100 puntos.
+
+## Cómo correrlo
+
+Necesitás Python 3.9 o superior (sin dependencias externas).
+
+```bash
+cd Dash/src
+
+# Partida automática con 4 simuladores hasta 100 puntos
+python -m dash_py.tester
+
+# Vos como humano + 3 simuladores (input por consola)
+python -m dash_py.consola
+```
 
 ## Estructura del proyecto
 
 ```
 Dash/
 ├── src/
-│   ├── dash/               # proyecto Java original (referencia)
-│   └── dash_py/            # migración a Python (este README)
+│   ├── dash/               # prototipo Java original (referencia)
+│   └── dash_py/            # versión Python
 │       ├── __init__.py
-│       ├── palo.py
-│       ├── carta.py
-│       ├── carta_normal.py
-│       ├── carta_especial.py
-│       ├── carta_caballo.py
-│       ├── carta_diez.py
-│       ├── carta_doce_especial.py
-│       ├── mano.py
-│       ├── mazo.py
-│       ├── descarte.py
-│       ├── jugador.py
-│       ├── decisor.py
-│       ├── ronda.py
-│       └── tester.py
+│       ├── palo.py             Enum Palo {ORO, COPA, BASTO, ESPADA}
+│       ├── carta.py            Carta (abstract)
+│       ├── carta_normal.py     Cartas sin efecto
+│       ├── carta_especial.py   CartaEspecial (abstract)
+│       ├── carta_caballo.py    11 — intercambia con otro jugador
+│       ├── carta_diez.py       10 — mira una carta propia
+│       ├── carta_doce_especial.py  12 de basto/espada — vale 0
+│       ├── mano.py             Mano (lista de cartas)
+│       ├── mazo.py             Mazo (pila + reshuffle desde descarte)
+│       ├── descarte.py         Descarte (pila con tope visible)
+│       ├── jugador.py          Jugador: mano + cartas_vistas + puntaje
+│       ├── decisor.py          Protocol Decisor + DecisorSimulador + DecisorMixto
+│       ├── decisor_consola.py  DecisorConsola (input por terminal)
+│       ├── ronda.py            Ronda (orquesta fases del turno y canto)
+│       ├── partida.py          Partida (multi-ronda, rotación, límite)
+│       ├── tester.py           entrypoint: partida automática 4 simuladores
+│       └── consola.py          entrypoint: humano + 3 simuladores
 ├── diagrama-clases-dash.html
 └── README.md
 ```
 
-Convención: un archivo por clase, nombres en español, snake_case en métodos.
+Convención: un archivo por clase, identificadores en español, snake_case en métodos.
 
-## Cómo correr el tester
-
-Necesitás Python 3.9 o superior (no usa dependencias externas).
-
-```
-cd Dash/src
-python -m dash_py.tester
-```
-
-El tester arma una mesa de 4 jugadores, reparte, abre el descarte, y juega una ronda completa con un simulador automático hasta que alguien canta Dash. Imprime turno a turno con los efectos de las cartas especiales y muestra el ganador y los puntajes acumulados al cierre.
-
-## Reglas implementadas
+## Reglas del juego
 
 ### Mazo y reparto
 
-La baraja española tiene 40 cartas: números 1, 2, 3, 4, 5, 6, 7, 10, 11 y 12 en los cuatro palos `oro`, `copa`, `basto` y `espada`. No hay 8 ni 9. Se reparten 4 cartas a cada jugador, una por una, y la primera carta del mazo restante sale boca arriba sobre la mesa para abrir el descarte.
+El mazo tiene 48 cartas: números 1 al 12 en los cuatro palos `oro`, `copa`, `basto` y `espada` (variante que sí incluye el 8 y el 9). Se reparten 4 cartas a cada jugador, una por una. Cada jugador "ve" sus dos primeras cartas al inicio; las otras dos quedan boca abajo. La primera carta del mazo restante sale al descarte y abre la mesa.
 
-Cada jugador "ve" sus dos primeras cartas al inicio (`marcar_iniciales_vistas(2)`); las otras dos quedan boca abajo y solo se descubren si las mira con un efecto.
+### Valor y efectos
 
-### Valor de cada carta
-
-| Carta              | Valor en puntos | Efecto al ir al descarte                            |
-|--------------------|-----------------|-----------------------------------------------------|
-| 1 a 7              | su número       | ninguno                                             |
-| 10                 | 10              | el jugador mira una carta propia que no conocía     |
-| 11 (Caballo)       | 11              | el jugador intercambia una carta con otro jugador   |
-| 12 de oro / copa   | 12              | ninguno                                             |
-| 12 de basto / espada | 0             | ninguno (es la carta más valiosa del juego)         |
+| Carta                  | Valor | Efecto al ir al descarte                          |
+|------------------------|-------|---------------------------------------------------|
+| 1 a 9                  | su número | ninguno                                       |
+| 10                     | 10    | el jugador mira una carta propia que no conocía   |
+| 11 (Caballo)           | 11    | el jugador intercambia una carta con otro jugador |
+| 12 de oro / copa       | 12    | ninguno                                           |
+| 12 de basto / espada   | 0     | ninguno (es la mejor carta del juego)             |
 
 ### Estructura del turno
 
-1. **Fase 1 (opcional).** El jugador puede tirar todas las cartas de su mano cuyo número coincida con el tope del descarte. La mano se achica.
-2. **Fase 2 (obligatoria).** Levanta una carta del mazo y decide:
-   - tirarla directo al descarte, o
-   - cambiarla por una de su mano (la vieja se va al descarte).
-3. **Fase 3 (opcional, al final del turno propio).** Cantar **Dash**: declara que cree tener el menor puntaje y corta la ronda. Los demás jugadores juegan exactamente un turno más cada uno y luego se revelan las manos.
+**Fase 1 — tirar matches (opcional).** El jugador puede intentar tirar cartas de su mano, incluso sin saber su valor (bluff).
+- Si el número coincide con el tope del descarte: la carta se descarta y dispara su efecto.
+- Si no coincide (par mal cantado): la carta se queda en la mano, el jugador la ve (quedó revelada), y recibe 1 carta del mazo como penalización. La mano crece +1.
 
-Cualquier carta que toque el descarte dispara su efecto: tanto si se tira desde la mano como si llega ahí por un swap o por una tirada directa desde el mazo.
+**Fase 2 — tomar o levantar (obligatoria).** El jugador elige una de dos opciones:
+- **Tomar el tope del descarte** y cambiarlo por una de su mano. La carta tomada no dispara efecto (ya lo hizo cuando se descartó). La carta que sale sí dispara efecto. *Esta opción está bloqueada si en fase 1 el jugador ya tiró algo*, para evitar el loophole de tirar un Diez y volvérselo a agarrar.
+- **Levantar del mazo** y luego: tirar la levantada al descarte (dispara efecto), o cambiarla por una de la mano (la vieja al descarte con efecto).
 
-### Cierre y puntaje
+**Fase 1' — más matches (opcional).** La fase 2 puede haber cambiado el tope, revelado cartas (Diez) o reorganizado manos (Caballo). El jugador puede intentar más tiradas con el mismo riesgo de penalización.
 
-Al cerrarse la ronda, cada jugador suma a su puntaje acumulado el valor de las cartas que le quedaron en la mano. No hay penalización por cantar Dash y no ganar: simplemente sumás lo tuyo. La gracia de cantar es que en una ronda con muchas incógnitas también te la jugás a la suerte.
+**Fase 3 — cantar Dash (opcional, fin del turno propio).** El jugador declara que corta la ronda. Cada otro jugador juega un turno más y luego se cierra. No hay penalización por cantar y no ganar: cada uno suma el valor real de su mano al acumulado.
+
+### Reshuffle
+
+Si el mazo se vacía durante la fase 2 (o al buscar una carta de penalización), el descarte —menos su tope actual— se mezcla y vuelve a ser el mazo.
+
+### Cierre de ronda y partida
+
+Al cerrar la ronda cada jugador suma el puntaje de su mano a su acumulado. El primer jugador rota una posición entre rondas. La partida termina cuando alguien supera el límite (100 por defecto); gana quien tenga el menor acumulado.
 
 ## Modelo de clases
 
-El diseño separa el "modelo del juego" (clases inmutables o de bajo nivel) de la "lógica de partida" (clases que orquestan).
-
 ```
-Palo  ──┐
-        │
 Carta (abstract) ──── CartaNormal
-        │
-        └────── CartaEspecial (abstract) ── CartaCaballo
-                                            CartaDiez
-                                            CartaDoceEspecial
+                └──── CartaEspecial (abstract) ── CartaCaballo
+                                              ├── CartaDiez
+                                              └── CartaDoceEspecial
 
-Mano    posee  →  List[Carta]
-Mazo    posee  →  List[Carta]   (pila, se roba del tope)
-Descarte posee →  List[Carta]   (pila, se ve el tope)
-Jugador posee  →  Mano + puntaje + cartas_vistas
+Mano     posee  →  List[Carta]
+Mazo     posee  →  List[Carta]   (pila, robar() del tope, reshuffle desde descarte)
+Descarte posee  →  List[Carta]   (pila, ver_tope() / sacar_tope())
+Jugador  posee  →  Mano + cartas_vistas + puntaje_acumulado
 
 Decisor (Protocol)
-   └── DecisorSimulador  (estrategia simple para el tester)
+   ├── DecisorSimulador   heurística simple, nunca bluffea
+   ├── DecisorConsola     input() por terminal
+   └── DecisorMixto       despacha según un mapa Jugador → Decisor
 
-Ronda  orquesta  →  jugadores + Mazo + Descarte + Decisor
+Ronda    orquesta →  turnos (fase 1 / 2 / 1' / 3) sobre una ronda
+Partida  orquesta →  varias Rondas hasta el límite, rota primer jugador
 ```
 
-`Carta.aplicar_efecto(ronda, jugador, decisor)` es el punto de extensión polimórfico. Devuelve un string log (o `None`) para que la `Ronda` lo recolecte y lo imprima en orden.
+`Carta.aplicar_efecto(ronda, jugador, decisor)` devuelve un `Optional[str]` con el log del efecto. La `Ronda` recolecta esos strings y los entrega en el dict de log del turno; los entrypoints deciden cuándo imprimirlos. No se imprime desde dentro de `aplicar_efecto` para preservar el orden temporal.
 
-## Decisor: cómo conectás un jugador real
+## El Protocol Decisor
 
 Toda decisión que tomaría una persona en la mesa pasa por el `Decisor`:
 
 ```python
 class Decisor(Protocol):
+    def decidir_proxima_tirada(self, jugador, descarte) -> Optional[int]: ...
+    # posición a intentar tirar en fase 1 / fase 1'; None para parar
+
+    def decidir_inicio_fase2(self, jugador, mazo, descarte) -> Tuple[str, Optional[int]]: ...
+    # ("tomar_descarte", pos) o ("levantar", None)
+
     def decidir_swap(self, jugador, levantada, mazo, descarte) -> Tuple[str, Optional[int]]: ...
+    # ("tirar", None) o ("cambiar", pos)
+
     def querer_cantar(self, jugador) -> bool: ...
     def elegir_pos_para_diez(self, jugador) -> Optional[int]: ...
     def elegir_caballo(self, jugador, otros) -> Optional[Tuple[Jugador, int, int]]: ...
+    # (otro_jugador, pos_del_otro, pos_propia)
 ```
 
-El proyecto trae `DecisorSimulador` con una heurística simple: cambia la levantada por la peor carta de la mano si conviene, canta Dash si su puntaje en mano es ≤ 10, mira la primera posición no vista cuando dispara el Diez, y en el Caballo intercambia su pos 0 con la del primer oponente.
-
-Para enchufar un jugador humano basta con escribir otra clase que implemente las cuatro firmas y pasársela a `Ronda.jugar_turno`.
+`DecisorSimulador` implementa una heurística simple: solo intenta tirar cartas que ya vio (nunca bluffea), toma el tope del descarte si mejora su mano, canta Dash cuando su puntaje estimado es bajo. `DecisorConsola` delega cada decisión en `input()` para que la tome un humano por terminal. `DecisorMixto` combina ambos, útil para partidas con humanos y bots mezclados.
 
 ## Cómo extenderlo
 
-- **Nuevo tipo de carta especial.** Heredá de `CartaEspecial`, definí `get_valor()` y sobrescribí `aplicar_efecto()` devolviendo el string del log.
-- **Nuevo decisor (IA, humano por consola, GUI).** Implementá el `Protocol` `Decisor`. No hace falta heredar de ninguna clase concreta.
-- **Otra variante de mazo.** Agregá un método de fábrica en `Mazo`, equivalente a `crear_mazo_espanol`.
+**Nuevo tipo de carta especial.** Heredá de `CartaEspecial`, definí `get_valor()` y sobrescribí `aplicar_efecto()` devolviendo el string del log.
 
-## Lo que todavía no está
+**Nuevo decisor (IA, GUI, red).** Implementá el Protocol `Decisor`. No hace falta heredar de ninguna clase concreta.
 
-- **Reshuffle del descarte cuando se acaba el mazo.** Hoy si el mazo se vacía sin que nadie haya cantado, la ronda se cierra a la fuerza.
-- **Penalización por par mal cantado.** El nombre de la mecánica que hace que la mano pueda crecer arriba de 4 cartas — pendiente de modelar.
-- **Partida (varias rondas hasta que un jugador se pasa del límite).** Está la base (`Jugador.verificar_derrota(limite)`) pero falta el loop que rote la mano para repartir y termine la partida.
-- **Interfaz humana.** Solo hay simulador. Falta una `DecisorConsola` o GUI.
+**Otra variante de mazo.** Agregá un método de fábrica en `Mazo`, equivalente a `crear_mazo_espanol`.
 
 ## Origen
 
-El paquete `src/dash_py/` es una migración 1 a 1 del proyecto Java en `src/dash/`. El Java original tiene las mismas clases (`Carta`, `Mazo`, `Mano`, `Jugador`, etc.) sin la `Ronda`, el `Descarte` ni el `Decisor`, que se sumaron durante la migración para terminar de modelar las reglas del juego.
+El paquete `src/dash_py/` es una migración del prototipo Java en `src/dash/`. El Java original tiene las mismas clases base (`Carta`, `Mazo`, `Mano`, `Jugador`) pero sin `Ronda`, `Descarte`, `Decisor` ni `Partida`, que se sumaron durante la migración para modelar las reglas completas del juego.
