@@ -46,9 +46,9 @@ def main() -> None:
     print(f"Partida hasta {partida.limite} puntos. Gana el de MENOR acumulado.\n")
 
     while not partida.terminada:
-        print(f"\n=================================================")
+        print("\n=================================================")
         print(f"   RONDA {partida.numero_ronda + 1}")
-        print(f"=================================================")
+        print("=================================================")
 
         ronda = partida.nueva_ronda()
 

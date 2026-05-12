@@ -143,10 +143,10 @@ def main() -> None:
     partida = Partida(jugadores, limite=LIMITE_PARTIDA)
 
     while not partida.terminada:
-        print(f"\n=================================================")
+        print("\n=================================================")
         print(f"   RONDA {partida.numero_ronda + 1}")
         print(f"   Orden: {[j.get_nombre() for j in partida.proxima_orden]}")
-        print(f"=================================================")
+        print("=================================================")
 
         ronda = partida.nueva_ronda()
         # Mostrar reparto y cartas iniciales vistas
